@@ -723,12 +723,11 @@ class LowTideApp(App):
         self._cleanup_macos_art_temp()
         self._macos_art_temp_path = path
 
-        # Add the cover as an external video track. mpv's macOS backend
-        # detects it via track-list and forwards it to MPNowPlayingInfoCenter.
-        await self.player._cmd(["video-add", path])
-        # Deselect the video track to suppress the floating window on macOS.
-        # The track stays in the track list for the macOS backend to detect.
+        # Suppress the floating video window BEFORE adding the track.
+        # On macOS, video-add creates a visible window despite --no-video;
+        # setting vid=no first prevents it from ever appearing.
         await self.player._cmd(["set_property", "vid", "no"])
+        await self.player._cmd(["video-add", path])
 
     def _download_album_art(self, url: str) -> str | None:
         """Return local path to downloaded album art, or None."""
